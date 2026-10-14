@@ -1,0 +1,27 @@
+docs/
+paper/
+.agent/
+.agents/
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# IDE & Editor settings
+.vscode/
+.idea/
+
+# Large datasets & models
+*.dat
+*.hea
+data/raw/
+data/processed/
+src/data/
+ptb-xl-*/
+
