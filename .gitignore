@@ -24,4 +24,6 @@ data/raw/
 data/processed/
 src/data/
 ptb-xl-*/
-
+# Checkpoints & Generated outputs
+checkpoints/
+outputs/
