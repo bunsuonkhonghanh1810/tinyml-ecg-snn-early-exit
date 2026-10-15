@@ -51,7 +51,7 @@ Hardware profile from `paper/esp32s3-mm.pdf`:
    - Surrogate gradient BPTT requires 20-30 epochs on larger sample pools for proper credit assignment.
 
 ## 4. Proposed Solution & Next Steps (Baseline SNN v2)
-- [ ] Upgrade to a **Residual SNN (ResNet-SNN)** architecture with 5-6 blocks and skip connections.
+- [ ] Upgrade to a **Spiking ResNet-1D (Res-SNN 1D)** architecture with residual blocks and membrane-level skip connections.
 - [ ] Increase kernel sizes to **k = 7, 11, 15** for multi-scale feature extraction of QRS and ST segments.
 - [ ] Expand channel dimensions to 32 -> 64 -> 128 -> 128 -> 256 (~150k - 300k parameters, ~150KB - 300KB INT8, requiring < 25KB SRAM buffer).
 - [ ] Introduce Focal Loss to strongly penalize misclassifications on minority classes (`MI`, `HYP`).
