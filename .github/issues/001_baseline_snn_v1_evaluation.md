@@ -1,6 +1,6 @@
 # Issue #1: Baseline 1D-SNN v1 (4-Block Conv1D-LIF) Underperforming (Macro F1 = 0.4132)
 
-- **Status**: Open / In Progress
+- **Status**: Closed (Superseded by Issue #2: `002_spiking_resnet1d_ptbxl_limitations_and_mitbih_migration.md`)
 - **Module**: `src/models/baseline_snn.py`, `scripts/02_train_baseline.py`
 - **Target Hardware**: Espressif ESP32-S3 (Xtensa Dual-Core 240MHz, 512KB SRAM, 4MB Flash)
 - **Author**: Nhom 2 NCKH SV
