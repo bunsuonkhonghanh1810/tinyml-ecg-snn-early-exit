@@ -1,31 +1,30 @@
-from .ptbxl_raw_loader import (
-    CLASS_NAMES,
+from .mitbih_loader import (
+    AAMI_CLASSES,
     CLASS_TO_IDX,
     IDX_TO_CLASS,
-    load_ptbxl_metadata,
-    read_record_signal,
-    get_lead_signal,
-)
-from .preprocessing import (
-    butter_bandpass,
+    AAMI_MAP,
+    DS1_TRAIN_RECORDS,
+    DS2_TEST_RECORDS,
+    load_mitbih_record,
+    load_mitbih_annotations,
+    extract_record_heartbeats,
     butter_bandpass_filter,
     normalize_zscore,
-    detect_r_peaks,
-    extract_heartbeats,
-    preprocess_ecg_lead,
 )
+from .ecg_dataset import ECGDataset, compute_class_weights
 
 __all__ = [
-    "CLASS_NAMES",
+    "AAMI_CLASSES",
     "CLASS_TO_IDX",
     "IDX_TO_CLASS",
-    "load_ptbxl_metadata",
-    "read_record_signal",
-    "get_lead_signal",
-    "butter_bandpass",
+    "AAMI_MAP",
+    "DS1_TRAIN_RECORDS",
+    "DS2_TEST_RECORDS",
+    "load_mitbih_record",
+    "load_mitbih_annotations",
+    "extract_record_heartbeats",
     "butter_bandpass_filter",
     "normalize_zscore",
-    "detect_r_peaks",
-    "extract_heartbeats",
-    "preprocess_ecg_lead",
+    "ECGDataset",
+    "compute_class_weights",
 ]

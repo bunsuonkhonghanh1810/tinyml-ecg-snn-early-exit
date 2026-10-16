@@ -14,7 +14,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.dataset.ecg_dataset import ECGDataset, compute_class_weights
-from src.dataset.ptbxl_raw_loader import CLASS_NAMES
+from src.dataset import AAMI_CLASSES as CLASS_NAMES
 from src.models.spiking_resnet1d import SpikingResNet1D
 from src.models.focal_loss import FocalLoss
 
@@ -28,17 +28,36 @@ def calculate_synops(model, dataloader, device, timesteps=8):
     spikes_s3_sum = 0
     spikes_s4_sum = 0
 
-    neurons_stem = 32 * 100
-    neurons_s1 = 32 * 100
-    neurons_s2 = 64 * 50
-    neurons_s3 = 128 * 25
-    neurons_s4 = 128 * 12
+    neurons_stem = 0
+    neurons_s1 = 0
+    neurons_s2 = 0
+    neurons_s3 = 0
+    neurons_s4 = 0
+
+    l_stem = 0
+    l_s1 = 0
+    l_s2 = 0
+    l_s3 = 0
+    l_s4 = 0
 
     with torch.no_grad():
         for x, _ in dataloader:
             x = x.to(device)
             bs = x.size(0)
             _, spikes = model(x, return_spikes=True)
+
+            if neurons_stem == 0:
+                l_stem = spikes["stem"].shape[3]
+                l_s1 = spikes["s1"].shape[3]
+                l_s2 = spikes["s2"].shape[3]
+                l_s3 = spikes["s3"].shape[3]
+                l_s4 = spikes["s4"].shape[3]
+
+                neurons_stem = spikes["stem"].shape[2] * l_stem
+                neurons_s1 = spikes["s1"].shape[2] * l_s1
+                neurons_s2 = spikes["s2"].shape[2] * l_s2
+                neurons_s3 = spikes["s3"].shape[2] * l_s3
+                neurons_s4 = spikes["s4"].shape[2] * l_s4
 
             total_samples += bs
             spikes_stem_sum += spikes["stem"].sum().item()
@@ -53,11 +72,11 @@ def calculate_synops(model, dataloader, device, timesteps=8):
     fr_s3 = spikes_s3_sum / (total_samples * timesteps * neurons_s3)
     fr_s4 = spikes_s4_sum / (total_samples * timesteps * neurons_s4)
 
-    mac_stem = 1 * 32 * 11 * 100
-    conn_s1 = 32 * 32 * 7 * 100 * 2
-    conn_s2 = (32 * 64 * 7 * 50) + (64 * 64 * 7 * 50) + (32 * 64 * 1 * 50)
-    conn_s3 = (64 * 128 * 5 * 25) + (128 * 128 * 5 * 25) + (64 * 128 * 1 * 25)
-    conn_s4 = 128 * 128 * 5 * 12 * 2
+    mac_stem = 1 * 32 * 11 * l_stem
+    conn_s1 = 32 * 32 * 7 * l_s1 * 2
+    conn_s2 = (32 * 64 * 7 * l_s2) + (64 * 64 * 7 * l_s2) + (32 * 64 * 1 * l_s2)
+    conn_s3 = (64 * 128 * 5 * l_s3) + (128 * 128 * 5 * l_s3) + (64 * 128 * 1 * l_s3)
+    conn_s4 = 128 * 128 * 5 * l_s4 * 2
     conn_fc = 128 * 5
 
     synops_s1 = conn_s1 * fr_stem
@@ -189,16 +208,20 @@ def main():
     test_dataset = ECGDataset(test_path)
 
     if args.subsample is not None and args.subsample < len(train_dataset):
-        sss = StratifiedShuffleSplit(n_splits=1, train_size=args.subsample, random_state=42)
-        indices, _ = next(sss.split(np.zeros(len(train_dataset)), train_dataset.y.numpy()))
+        try:
+            sss = StratifiedShuffleSplit(n_splits=1, train_size=args.subsample, random_state=42)
+            indices, _ = next(sss.split(np.zeros(len(train_dataset)), train_dataset.y.numpy()))
+        except ValueError:
+            rng = np.random.RandomState(42)
+            indices = rng.choice(len(train_dataset), size=args.subsample, replace=False)
         train_dataset = Subset(train_dataset, indices)
         y_for_weights = train_dataset.dataset.y[indices]
     else:
         y_for_weights = train_dataset.y
 
     if args.val_subset is not None and args.val_subset < len(val_dataset):
-        sss_val = StratifiedShuffleSplit(n_splits=1, train_size=args.val_subset, random_state=42)
-        val_indices, _ = next(sss_val.split(np.zeros(len(val_dataset)), val_dataset.y.numpy()))
+        rng = np.random.RandomState(42)
+        val_indices = rng.choice(len(val_dataset), size=args.val_subset, replace=False)
         val_eval_dataset = Subset(val_dataset, val_indices)
     else:
         val_eval_dataset = val_dataset
